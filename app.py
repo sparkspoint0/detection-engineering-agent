@@ -27,7 +27,7 @@ def get_client() -> AzureOpenAI:
     )
 
 
-def generate_detection_draft(scenario: str) -> str:
+def generate_detection_draft(user_prompt: str) -> str:
     deployment_name = os.getenv("AZURE_OPENAI_DEPLOYMENT")
 
     if not deployment_name:
@@ -40,7 +40,7 @@ def generate_detection_draft(scenario: str) -> str:
         model=deployment_name,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": scenario},
+            {"role": "user", "content": user_prompt},
         ],
         temperature=0.2,
     )
@@ -57,12 +57,23 @@ st.set_page_config(
 st.title("Detection Engineer Agent")
 st.caption("From SOC investigation to Microsoft Sentinel detection logic.")
 
+# Initialize session state for the user prompt.
+if "user_prompt" not in st.session_state:
+    st.session_state.user_prompt = ""
+
 with st.sidebar:
     st.header("Demo Scenarios")
+
     selected_scenario = st.selectbox(
-        "Choose a sample scenario",
-        ["Custom"] + list(SAMPLE_SCENARIOS.keys()),
+        "Choose a sample scenario to load",
+        list(SAMPLE_SCENARIOS.keys()),
     )
+
+    if st.button("Load Sample Scenario"):
+        st.session_state.user_prompt = SAMPLE_SCENARIOS[selected_scenario]
+
+    if st.button("Clear Prompt"):
+        st.session_state.user_prompt = ""
 
     st.markdown("---")
     st.markdown("### Project Output")
@@ -79,28 +90,31 @@ with st.sidebar:
         """
     )
 
-if selected_scenario == "Custom":
-    default_text = ""
-else:
-    default_text = SAMPLE_SCENARIOS[selected_scenario]
+st.markdown("### Enter any SOC scenario or detection engineering request")
 
-scenario = st.text_area(
-    "SOC scenario, incident summary, or suspicious behavior",
-    value=default_text,
-    height=240,
-    placeholder="Example: A user had multiple failed sign-ins followed by a successful login from a new country...",
+user_prompt = st.text_area(
+    "Type or paste your own prompt below:",
+    key="user_prompt",
+    height=260,
+    placeholder=(
+        "Example: A user had multiple failed sign-ins followed by a successful login "
+        "from a new country. MFA was approved, and the account downloaded several "
+        "SharePoint files."
+    ),
 )
+
+st.markdown("You can enter a full incident summary, suspicious behavior, alert details, or a detection engineering request.")
 
 generate = st.button("Generate Detection Draft")
 
 if generate:
-    if not scenario.strip():
-        st.warning("Please enter a SOC scenario first.")
+    if not user_prompt.strip():
+        st.warning("Please enter a SOC scenario or detection engineering request first.")
         st.stop()
 
     with st.spinner("Generating detection engineering draft..."):
         try:
-            result = generate_detection_draft(scenario)
+            result = generate_detection_draft(user_prompt)
         except Exception as error:
             st.error("The model call failed. Check your endpoint, key, deployment name, API version, and Azure access.")
             st.exception(error)
