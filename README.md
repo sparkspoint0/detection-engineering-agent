@@ -1,6 +1,6 @@
-# Sentinel Detection Copilot
+# Detection Engineer Agent
 
-Sentinel Detection Copilot is a Microsoft Foundry / Azure OpenAI-powered reasoning agent that helps SOC analysts and detection engineers convert suspicious activity into Microsoft Sentinel detection engineering drafts.
+Detection Engineer Agent is a Microsoft Foundry / Azure OpenAI-powered reasoning agent that helps SOC analysts and detection engineers convert suspicious activity into Microsoft Sentinel detection engineering drafts.
 
 ## Project Track
 
@@ -16,7 +16,7 @@ SOC analysts often investigate suspicious activity, but the lessons from those i
 
 ## Solution
 
-Sentinel Detection Copilot accepts a SOC scenario, alert summary, or suspicious behavior and generates a structured detection engineering draft.
+Detection Engineer Agent accepts a SOC scenario, alert summary, or suspicious behavior and generates a structured detection engineering draft.
 
 The output includes:
 
